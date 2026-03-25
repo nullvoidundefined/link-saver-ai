@@ -2,6 +2,8 @@
 
 Bookmark manager API where saved URLs are auto-fetched and summarized by Claude with real-time SSE streaming. Redis caches summaries for repeat views.
 
+**Live app:** https://link-saver-ai.vercel.app
+
 ## Architecture
 
 ```
