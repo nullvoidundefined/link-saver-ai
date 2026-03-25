@@ -18,6 +18,7 @@ import { requestLogger } from "app/middleware/requestLogger/requestLogger.js";
 import { loadSession } from "app/middleware/requireAuth/requireAuth.js";
 import { authRouter } from "app/routes/auth.js";
 import { linksRouter } from "app/routes/links.js";
+import { tagsRouter } from "app/routes/tags.js";
 import { logger } from "app/utils/logs/logger.js";
 
 function validateEnv(): void {
@@ -91,6 +92,7 @@ app.get("/health", async (_req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/links", linksRouter);
+app.use("/tags", tagsRouter);
 
 // Attach reusable utilities for 404 and error handling.
 app.use(notFoundHandler);
