@@ -23,6 +23,10 @@ export default function StreamingSummary({
     );
     const [error, setError] = useState<string | null>(null);
     const [isCached, setIsCached] = useState(false);
+    const [tokenUsage, setTokenUsage] = useState<{
+        inputTokens: number;
+        outputTokens: number;
+    } | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
 
     const startStreaming = useCallback(() => {
@@ -33,6 +37,7 @@ export default function StreamingSummary({
         setText('');
         setError(null);
         setIsCached(false);
+        setTokenUsage(null);
         setStatus('connecting');
 
         const url = getSSEUrl(`/links/${linkId}/summary`);
@@ -50,6 +55,10 @@ export default function StreamingSummary({
                     token?: string;
                     summary?: string;
                     message?: string;
+                    usage?: {
+                        inputTokens: number;
+                        outputTokens: number;
+                    };
                 };
 
                 if (data.type === 'cached' && data.summary) {
@@ -58,6 +67,9 @@ export default function StreamingSummary({
                 } else if (data.type === 'token' && data.token) {
                     setText((prev) => prev + data.token);
                 } else if (data.type === 'done') {
+                    if (data.usage) {
+                        setTokenUsage(data.usage);
+                    }
                     setStatus('complete');
                     es.close();
                 } else if (data.type === 'error') {
@@ -196,6 +208,26 @@ export default function StreamingSummary({
                             }}
                         />
                     )}
+                </div>
+            )}
+
+            {tokenUsage && status === 'complete' && (
+                <div
+                    style={{
+                        marginTop: '0.5rem',
+                        fontSize: '0.75rem',
+                        color: '#666',
+                        display: 'flex',
+                        gap: '1rem',
+                    }}
+                >
+                    <span>
+                        Input: {tokenUsage.inputTokens.toLocaleString()} tokens
+                    </span>
+                    <span>
+                        Output: {tokenUsage.outputTokens.toLocaleString()}{' '}
+                        tokens
+                    </span>
                 </div>
             )}
         </div>

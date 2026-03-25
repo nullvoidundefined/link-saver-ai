@@ -5,9 +5,14 @@ import { logger } from "app/utils/logs/logger.js";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
 export interface StreamCallbacks {
   onToken: (token: string) => void;
-  onDone: (fullText: string) => void;
+  onDone: (fullText: string, usage: TokenUsage) => void;
   onError: (error: Error) => void;
 }
 
@@ -43,7 +48,10 @@ export async function streamSummary(
       },
       "Summary stream completed",
     );
-    callbacks.onDone(fullText);
+    callbacks.onDone(fullText, {
+      inputTokens: finalMessage.usage.input_tokens,
+      outputTokens: finalMessage.usage.output_tokens,
+    });
   } catch (err) {
     if (abortSignal?.aborted) {
       logger.info("Summary stream aborted by client disconnect");

@@ -86,10 +86,10 @@ export async function streamLinkSummary(req: Request, res: Response): Promise<vo
       onToken(token) {
         res.write(`data: ${JSON.stringify({ type: "token", token })}\n\n`);
       },
-      async onDone(fullText) {
+      async onDone(fullText, usage) {
         await linksRepo.updateLinkSummary(linkId, fullText, "complete");
         await cacheSummary(link.url_hash, fullText);
-        res.write(`data: ${JSON.stringify({ type: "done", summary: fullText })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: "done", summary: fullText, usage })}\n\n`);
         res.end();
       },
       async onError(error) {
