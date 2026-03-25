@@ -26,6 +26,7 @@ export default defineConfig({
         "src/handlers/links/**",
         "src/repositories/links/**",
         "src/repositories/tags/**",
+        "src/repositories/link-tags/**",
         "src/handlers/tags/**",
         "src/routes/links.ts",
         "src/routes/tags.ts",
