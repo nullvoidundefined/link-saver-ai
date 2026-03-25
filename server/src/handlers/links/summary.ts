@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import * as linksRepo from "app/repositories/links/links.js";
 import { streamSummary } from "app/services/anthropic.js";
 import { fetchContent } from "app/services/content-fetcher.js";
-import { cacheSummary, getCachedSummary } from "app/services/summary-cache.js";
+import { bustSummaryCache, cacheSummary, getCachedSummary } from "app/services/summary-cache.js";
 import { logger } from "app/utils/logs/logger.js";
 import { parseIdParam } from "app/utils/parsers/parseIdParam.js";
 
@@ -100,4 +100,25 @@ export async function streamLinkSummary(req: Request, res: Response): Promise<vo
     },
     abortController.signal,
   );
+}
+
+export async function resummarize(req: Request, res: Response): Promise<void> {
+  const userId = req.user!.id;
+  const linkId = parseIdParam(req.params.id);
+  if (!linkId) {
+    res.status(400).json({ error: { message: "Invalid link ID" } });
+    return;
+  }
+
+  const link = await linksRepo.getLinkById(linkId, userId);
+  if (!link) {
+    res.status(404).json({ error: { message: "Link not found" } });
+    return;
+  }
+
+  await bustSummaryCache(link.url_hash);
+  await linksRepo.updateLinkSummary(linkId, "", "pending");
+
+  logger.info({ event: "resummarize", linkId, userId }, "Cache busted, ready for re-summary");
+  res.json({ data: { message: "Cache cleared. Request the summary endpoint to re-stream." } });
 }

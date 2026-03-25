@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { getSSEUrl } from '@/lib/api';
+import { api, getSSEUrl } from '@/lib/api';
 
 interface StreamingSummaryProps {
     linkId: string;
@@ -22,6 +22,7 @@ export default function StreamingSummary({
         summaryStatus === 'complete' ? 'complete' : 'idle',
     );
     const [error, setError] = useState<string | null>(null);
+    const [isCached, setIsCached] = useState(false);
     const eventSourceRef = useRef<EventSource | null>(null);
 
     const startStreaming = useCallback(() => {
@@ -31,6 +32,7 @@ export default function StreamingSummary({
 
         setText('');
         setError(null);
+        setIsCached(false);
         setStatus('connecting');
 
         const url = getSSEUrl(`/links/${linkId}/summary`);
@@ -52,6 +54,7 @@ export default function StreamingSummary({
 
                 if (data.type === 'cached' && data.summary) {
                     setText(data.summary);
+                    setIsCached(true);
                 } else if (data.type === 'token' && data.token) {
                     setText((prev) => prev + data.token);
                 } else if (data.type === 'done') {
@@ -75,6 +78,17 @@ export default function StreamingSummary({
             es.close();
         };
     }, [linkId, status]);
+
+    const handleResummarize = useCallback(async () => {
+        try {
+            await api.post(`/links/${linkId}/resummarize`, {});
+            startStreaming();
+        } catch (err) {
+            setError(
+                err instanceof Error ? err.message : 'Failed to re-summarize',
+            );
+        }
+    }, [linkId, startStreaming]);
 
     useEffect(() => {
         return () => {
@@ -117,6 +131,7 @@ export default function StreamingSummary({
                     }}
                 >
                     {status}
+                    {isCached && status === 'complete' ? ' (cached)' : ''}
                 </span>
                 {(status === 'idle' || status === 'error') && (
                     <button
@@ -132,6 +147,22 @@ export default function StreamingSummary({
                         }}
                     >
                         {status === 'error' ? 'Retry' : 'Generate Summary'}
+                    </button>
+                )}
+                {status === 'complete' && (
+                    <button
+                        onClick={handleResummarize}
+                        style={{
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.85rem',
+                            background: 'none',
+                            color: '#0070f3',
+                            border: '1px solid #0070f3',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Re-summarize
                     </button>
                 )}
             </div>
