@@ -5,6 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import AuthForm from '@/components/AuthForm';
 import LinkForm from '@/components/LinkForm';
 import StreamingSummary from '@/components/StreamingSummary';
+import TagManager from '@/components/TagManager';
+import type { Tag } from '@/components/TagManager';
 import { api } from '@/lib/api';
 import { AuthProvider, useAuth } from '@/lib/auth';
 
@@ -47,6 +49,11 @@ function Dashboard() {
     const { user, loading, logout } = useAuth();
     const [links, setLinks] = useState<Link[]>([]);
     const [selectedLink, setSelectedLink] = useState<Link | null>(null);
+    const [allTags, setAllTags] = useState<Tag[]>([]);
+    const [linkTags, setLinkTags] = useState<Tag[]>([]);
+    const [filterTag, setFilterTag] = useState<string | null>(null);
+    // Map of linkId -> Tag[] for showing tag chips in the list
+    const [linkTagMap, setLinkTagMap] = useState<Record<string, Tag[]>>({});
 
     const fetchLinks = useCallback(async () => {
         try {
@@ -57,11 +64,75 @@ function Dashboard() {
         }
     }, []);
 
+    const fetchAllTags = useCallback(async () => {
+        try {
+            const res = await api.get<{ data: Tag[] }>('/tags');
+            setAllTags(res.data);
+        } catch {
+            // ignore
+        }
+    }, []);
+
+    const fetchLinkTags = useCallback(async (linkId: string) => {
+        try {
+            const res = await api.get<{ data: Tag[] }>(`/links/${linkId}/tags`);
+            setLinkTags(res.data);
+            setLinkTagMap((prev) => ({ ...prev, [linkId]: res.data }));
+        } catch {
+            setLinkTags([]);
+        }
+    }, []);
+
+    const fetchAllLinkTags = useCallback(async (linkList: Link[]) => {
+        const map: Record<string, Tag[]> = {};
+        await Promise.all(
+            linkList.map(async (link) => {
+                try {
+                    const res = await api.get<{ data: Tag[] }>(
+                        `/links/${link.id}/tags`,
+                    );
+                    map[link.id] = res.data;
+                } catch {
+                    map[link.id] = [];
+                }
+            }),
+        );
+        setLinkTagMap(map);
+    }, []);
+
     useEffect(() => {
         if (user) {
             fetchLinks();
+            fetchAllTags();
         }
-    }, [user, fetchLinks]);
+    }, [user, fetchLinks, fetchAllTags]);
+
+    // When links change, fetch tags for all of them
+    useEffect(() => {
+        if (links.length > 0) {
+            fetchAllLinkTags(links);
+        }
+    }, [links, fetchAllLinkTags]);
+
+    // When selected link changes, fetch its tags
+    useEffect(() => {
+        if (selectedLink) {
+            fetchLinkTags(selectedLink.id);
+        } else {
+            setLinkTags([]);
+        }
+    }, [selectedLink, fetchLinkTags]);
+
+    const handleTagsChange = useCallback(() => {
+        fetchAllTags();
+        if (selectedLink) {
+            fetchLinkTags(selectedLink.id);
+        }
+        // Refresh all link tags for filtering
+        if (links.length > 0) {
+            fetchAllLinkTags(links);
+        }
+    }, [fetchAllTags, fetchLinkTags, fetchAllLinkTags, selectedLink, links]);
 
     const handleDelete = useCallback(
         async (linkId: string) => {
@@ -73,6 +144,13 @@ function Dashboard() {
         },
         [selectedLink],
     );
+
+    // Filter links by tag
+    const filteredLinks = filterTag
+        ? links.filter((link) =>
+              (linkTagMap[link.id] || []).some((t) => t.id === filterTag),
+          )
+        : links;
 
     if (loading) {
         return (
@@ -136,6 +214,15 @@ function Dashboard() {
                 }}
             />
 
+            <TagManager
+                linkId={selectedLink?.id ?? null}
+                allTags={allTags}
+                linkTags={linkTags}
+                onTagsChange={handleTagsChange}
+                onFilterTag={setFilterTag}
+                activeFilterTag={filterTag}
+            />
+
             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
                 {/* Sidebar: link list */}
                 <div style={{ width: '380px', flexShrink: 0 }}>
@@ -149,27 +236,29 @@ function Dashboard() {
                             letterSpacing: '0.05em',
                         }}
                     >
-                        Saved Links ({links.length})
+                        Saved Links ({filteredLinks.length})
                     </h2>
-                    {links.length === 0 ? (
+                    {filteredLinks.length === 0 ? (
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
-                            No links saved yet. Paste a URL above to get
-                            started.
+                            {filterTag
+                                ? 'No links match this tag filter.'
+                                : 'No links saved yet. Paste a URL above to get started.'}
                         </p>
                     ) : (
                         <ul
                             style={{
                                 listStyle: 'none',
                                 padding: 0,
-                                maxHeight: 'calc(100vh - 280px)',
+                                maxHeight: 'calc(100vh - 380px)',
                                 overflowY: 'auto',
                             }}
                         >
-                            {links.map((link) => {
+                            {filteredLinks.map((link) => {
                                 const isSelected = selectedLink?.id === link.id;
                                 const badge =
                                     statusBadge[link.summary_status] ??
                                     statusBadge.pending;
+                                const tags = linkTagMap[link.id] || [];
 
                                 return (
                                     <li
@@ -251,6 +340,35 @@ function Dashboard() {
                                                 {timeAgo(link.created_at)}
                                             </span>
                                         </div>
+
+                                        {tags.length > 0 && (
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    gap: '0.3rem',
+                                                    marginTop: '0.35rem',
+                                                    flexWrap: 'wrap',
+                                                }}
+                                            >
+                                                {tags.map((tag) => (
+                                                    <span
+                                                        key={tag.id}
+                                                        style={{
+                                                            fontSize: '0.68rem',
+                                                            padding: '1px 6px',
+                                                            borderRadius:
+                                                                '999px',
+                                                            background: `${tag.color || '#6366f1'}22`,
+                                                            color:
+                                                                tag.color ||
+                                                                '#6366f1',
+                                                        }}
+                                                    >
+                                                        {tag.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
 
                                         {link.summary && (
                                             <p
