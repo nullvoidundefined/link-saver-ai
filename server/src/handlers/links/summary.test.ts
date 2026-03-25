@@ -42,7 +42,7 @@ function createApp() {
   app.use(cookieParser());
   // Inject fake user
   app.use((req, _res, next) => {
-    req.user = { id: userId, email: "test@example.com", created_at: new Date() };
+    req.user = { id: userId, email: "test@example.com", created_at: new Date(), updated_at: null };
     next();
   });
   app.get("/links/:id/summary", streamLinkSummary);
