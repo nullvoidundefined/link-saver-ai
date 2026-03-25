@@ -61,6 +61,23 @@ export async function updateLinkSummary(
   ]);
 }
 
+export async function deleteLink(linkId: string, userId: string): Promise<boolean> {
+  const result = await query("DELETE FROM links WHERE id = $1 AND user_id = $2", [linkId, userId]);
+  return (result.rowCount ?? 0) > 0;
+}
+
+export async function updateLink(
+  linkId: string,
+  userId: string,
+  fields: { title?: string },
+): Promise<LinkRow | null> {
+  const result = await query<LinkRow>(
+    "UPDATE links SET title = COALESCE($1, title) WHERE id = $2 AND user_id = $3 RETURNING *",
+    [fields.title ?? null, linkId, userId],
+  );
+  return result.rows[0] ?? null;
+}
+
 export async function updateLinkContent(
   linkId: string,
   content: string,

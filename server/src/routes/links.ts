@@ -11,6 +11,8 @@ linksRouter.use(requireAuth);
 linksRouter.post("/", linksHandlers.create);
 linksRouter.get("/", linksHandlers.list);
 linksRouter.get("/:id", linksHandlers.getById);
+linksRouter.patch("/:id", linksHandlers.update);
+linksRouter.delete("/:id", linksHandlers.remove);
 linksRouter.get("/:id/summary", streamLinkSummary);
 
 export { linksRouter };
