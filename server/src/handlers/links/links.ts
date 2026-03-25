@@ -41,7 +41,10 @@ export async function create(req: Request, res: Response): Promise<void> {
 
 export async function list(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
-  const links = await linksRepo.getLinksByUserId(userId);
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const links = q
+    ? await linksRepo.searchLinks(userId, q)
+    : await linksRepo.getLinksByUserId(userId);
   res.json({ data: links });
 }
 

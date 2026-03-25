@@ -52,12 +52,14 @@ function Dashboard() {
     const [allTags, setAllTags] = useState<Tag[]>([]);
     const [linkTags, setLinkTags] = useState<Tag[]>([]);
     const [filterTag, setFilterTag] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
     // Map of linkId -> Tag[] for showing tag chips in the list
     const [linkTagMap, setLinkTagMap] = useState<Record<string, Tag[]>>({});
 
-    const fetchLinks = useCallback(async () => {
+    const fetchLinks = useCallback(async (q?: string) => {
         try {
-            const res = await api.get<{ data: Link[] }>('/links');
+            const qs = q ? `?q=${encodeURIComponent(q)}` : '';
+            const res = await api.get<{ data: Link[] }>(`/links${qs}`);
             setLinks(res.data);
         } catch {
             // not logged in or error
@@ -238,6 +240,25 @@ function Dashboard() {
                     >
                         Saved Links ({filteredLinks.length})
                     </h2>
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            fetchLinks(e.target.value || undefined);
+                        }}
+                        placeholder="Search by title, domain, or tag..."
+                        style={{
+                            width: '100%',
+                            padding: '0.5rem 0.75rem',
+                            fontSize: '0.85rem',
+                            border: '1px solid #333',
+                            borderRadius: '8px',
+                            background: 'var(--background)',
+                            color: 'var(--foreground)',
+                            marginBottom: '0.75rem',
+                        }}
+                    />
                     {filteredLinks.length === 0 ? (
                         <p style={{ color: '#666', fontSize: '0.9rem' }}>
                             {filterTag

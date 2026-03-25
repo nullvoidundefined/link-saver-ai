@@ -61,6 +61,20 @@ export async function updateLinkSummary(
   ]);
 }
 
+export async function searchLinks(userId: string, searchQuery: string): Promise<LinkRow[]> {
+  const pattern = `%${searchQuery}%`;
+  const result = await query<LinkRow>(
+    `SELECT DISTINCT l.* FROM links l
+     LEFT JOIN link_tags lt ON lt.link_id = l.id
+     LEFT JOIN tags t ON t.id = lt.tag_id
+     WHERE l.user_id = $1
+       AND (l.title ILIKE $2 OR l.domain ILIKE $2 OR l.url ILIKE $2 OR t.name ILIKE $2)
+     ORDER BY l.created_at DESC`,
+    [userId, pattern],
+  );
+  return result.rows;
+}
+
 export async function deleteLink(linkId: string, userId: string): Promise<boolean> {
   const result = await query("DELETE FROM links WHERE id = $1 AND user_id = $2", [linkId, userId]);
   return (result.rowCount ?? 0) > 0;
