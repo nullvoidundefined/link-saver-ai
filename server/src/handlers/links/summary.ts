@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import * as linksRepo from "app/repositories/links/links.js";
 import { streamSummary } from "app/services/anthropic.js";
 import { fetchContent } from "app/services/content-fetcher.js";
+import { cacheSummary, getCachedSummary } from "app/services/summary-cache.js";
 import { logger } from "app/utils/logs/logger.js";
 import { parseIdParam } from "app/utils/parsers/parseIdParam.js";
 
@@ -39,7 +40,31 @@ export async function streamLinkSummary(req: Request, res: Response): Promise<vo
     return;
   }
 
-  // Set SSE headers
+  // Check Redis cache before hitting the LLM
+  const cached = await getCachedSummary(link.url_hash);
+  if (cached) {
+    logger.info({ linkId, urlHash: link.url_hash }, "Summary cache hit");
+
+    // Ensure DB is up-to-date with the cached value
+    if (link.summary_status !== "complete") {
+      await linksRepo.updateLinkSummary(linkId, cached, "complete");
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
+    res.write(`data: ${JSON.stringify({ type: "cached", summary: cached })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: "done", summary: cached })}\n\n`);
+    res.end();
+    return;
+  }
+
+  // Cache miss — stream from LLM
+  logger.info({ linkId, urlHash: link.url_hash }, "Summary cache miss, streaming from LLM");
+
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
@@ -47,13 +72,11 @@ export async function streamLinkSummary(req: Request, res: Response): Promise<vo
     "X-Accel-Buffering": "no",
   });
 
-  // Set up abort controller for client disconnect
   const abortController = new AbortController();
   req.on("close", () => {
     abortController.abort();
   });
 
-  // Update status to streaming
   await linksRepo.updateLinkSummary(linkId, "", "streaming");
 
   await streamSummary(
@@ -65,6 +88,7 @@ export async function streamLinkSummary(req: Request, res: Response): Promise<vo
       },
       async onDone(fullText) {
         await linksRepo.updateLinkSummary(linkId, fullText, "complete");
+        await cacheSummary(link.url_hash, fullText);
         res.write(`data: ${JSON.stringify({ type: "done", summary: fullText })}\n\n`);
         res.end();
       },

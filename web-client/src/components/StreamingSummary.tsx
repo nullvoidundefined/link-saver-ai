@@ -50,7 +50,9 @@ export default function StreamingSummary({
                     message?: string;
                 };
 
-                if (data.type === 'token' && data.token) {
+                if (data.type === 'cached' && data.summary) {
+                    setText(data.summary);
+                } else if (data.type === 'token' && data.token) {
                     setText((prev) => prev + data.token);
                 } else if (data.type === 'done') {
                     setStatus('complete');
