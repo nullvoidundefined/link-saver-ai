@@ -8,6 +8,7 @@ import helmet from "helmet";
 
 import { corsConfig } from "app/config/corsConfig.js";
 import { isProduction } from "app/config/env.js";
+import { getRedis, shutdownRedis } from "app/config/redis.js";
 import pool, { query } from "app/db/pool/pool.js";
 import { csrfGuard } from "app/middleware/csrfGuard/csrfGuard.js";
 import { errorHandler } from "app/middleware/errorHandler/errorHandler.js";
@@ -77,6 +78,8 @@ query("SELECT NOW()")
   .then(() => logger.info("Connected to database"))
   .catch((err: unknown) => logger.error({ err }, "Database connection failed"));
 
+getRedis();
+
 app.get("/health", async (_req, res) => {
   try {
     await query("SELECT 1");
@@ -125,6 +128,7 @@ if (isEntryModule) {
     logger.info({ signal }, "Shutting down gracefully");
     await new Promise<void>((resolve) => server.close(() => resolve()));
     logger.info("HTTP server closed");
+    await shutdownRedis();
     await pool.end();
     process.exit(0);
   }
