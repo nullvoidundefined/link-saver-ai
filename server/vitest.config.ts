@@ -16,6 +16,7 @@ export default defineConfig({
         "**/types/**",
         "**/db/**",
         "**/rateLimiter.ts",
+        "**/summarizeRateLimit.ts",
         "**/*.d.ts",
         "**/*.test.ts",
         "src/index.ts",
