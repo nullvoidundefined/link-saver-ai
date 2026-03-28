@@ -388,26 +388,27 @@ Server-Sent Events are used instead of WebSockets because summaries are strictly
 
 **End-to-end flow:**
 
-```
-Client                            Server                          Anthropic
-  │                                 │                                │
-  │── GET /links/:id/summary ──────>│                                │
-  │                                 │── Check Redis cache ──────────>│
-  │                                 │                                │
-  │   [Cache miss]                  │                                │
-  │                                 │── Update DB: status=streaming  │
-  │                                 │                                │
-  │                                 │── messages.stream({ ... }) ───>│
-  │                                 │                                │
-  │<── data: {type:"token",...} ────│<── onText callback ────────────│
-  │<── data: {type:"token",...} ────│<── onText callback ────────────│
-  │         (repeats...)            │         (repeats...)           │
-  │                                 │                                │
-  │<── data: {type:"done",...} ─────│<── finalMessage() ─────────────│
-  │                                 │                                │
-  │                                 │── Save to DB: status=complete  │
-  │                                 │── Cache in Redis (7d TTL)      │
-  │── [close connection] ──────────>│                                │
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Redis
+    participant Anthropic
+
+    Client->>Server: GET /links/:id/summary
+    Server->>Redis: GET summary:hash
+    Redis-->>Server: (miss)
+    Server->>Server: UPDATE status = streaming
+    Server->>Anthropic: messages.stream()
+    loop Each token
+        Anthropic-->>Server: onText callback
+        Server-->>Client: data: {type:"token"}
+    end
+    Anthropic-->>Server: finalMessage()
+    Server-->>Client: data: {type:"done"}
+    Server->>Server: UPDATE status = complete
+    Server->>Redis: SET summary:hash (7d TTL)
+    Client->>Server: close
 ```
 
 **Client disconnect handling:**
@@ -424,29 +425,33 @@ If the user navigates away mid-stream, the Anthropic API call is cancelled immed
 
 **Cache hit path:**
 
-```
-Client                     Server              Redis
-  │                          │                   │
-  │── GET /links/:id/summary>│                   │
-  │                          │── GET summary:hash>│
-  │                          │<──── summary text ─│
-  │<── data: {cached,...} ───│                   │
-  │<── data: {done,...} ─────│                   │
-  │── [close] ──────────────>│                   │
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Redis
+
+    Client->>Server: GET /links/:id/summary
+    Server->>Redis: GET summary:hash
+    Redis-->>Server: summary text
+    Server-->>Client: data: {type:"cached"}
+    Server-->>Client: data: {type:"done"}
+    Client->>Server: close
 ```
 
 A cache hit returns instantly — no LLM call, no DB write, no token usage.
 
 **`StreamingSummary` component state machine:**
 
-```
-idle ──[click Generate]──> connecting ──[EventSource open]──> streaming
-  ^                                                               │
-  │                                                    [done event]
-  │                                                               │
-error <──[error event]────────────────────────────────────── complete
-  │
-  └──[click Retry]──> connecting ...
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle --> connecting: click Generate
+    connecting --> streaming: EventSource open
+    streaming --> complete: done event
+    streaming --> error: error event
+    complete --> connecting: click Re-summarize
+    error --> connecting: click Retry
 ```
 
 The component tracks an `accumulated` string in a closure variable (not React state) alongside `setText`. When the `done` event fires, `onComplete(accumulated)` is called directly from the event handler — not inside a state setter — so parent state updates don't trigger React's "update during render" warning.
@@ -556,9 +561,13 @@ const html = await fetch(url, {
 ```
 
 Then strips HTML manually:
-```
-Remove <script> blocks → Remove <style> blocks → Strip all HTML tags
-→ Decode HTML entities → Collapse whitespace
+
+```mermaid
+flowchart LR
+    A["Remove &lt;script&gt; blocks"] --> B["Remove &lt;style&gt; blocks"]
+    B --> C["Strip HTML tags"]
+    C --> D["Decode HTML entities"]
+    D --> E["Collapse whitespace"]
 ```
 
 **Content limit:** 100,000 characters maximum. Content is truncated before being sent to Claude to stay within reasonable token budgets and to keep latency predictable.
@@ -569,47 +578,21 @@ Remove <script> blocks → Remove <style> blocks → Strip all HTML tags
 
 Middleware is applied in this order for every request:
 
-```
-Request
-  │
-  ▼
-helmet()              — Security headers (XSS, clickjacking, MIME, etc.)
-  │
-  ▼
-corsConfig            — Allow credentials from CORS_ORIGIN
-  │
-  ▼
-requestLogger         — pino-http: assigns request ID, logs on response finish
-  │
-  ▼
-rateLimiter           — Global rate limit (1000/15min dev, 100/15min prod)
-  │
-  ▼
-express.json()        — Parse JSON body (10kb limit)
-  │
-  ▼
-express.urlencoded()  — Parse form body (10kb limit)
-  │
-  ▼
-cookieParser()        — Parse `Cookie` header into req.cookies
-  │
-  ▼
-csrfGuard             — Reject POST/PUT/PATCH/DELETE without X-Requested-With
-  │
-  ▼
-loadSession           — Attach req.user from session cookie (non-blocking)
-  │
-  ▼
-res.setTimeout(30s)   — Abort hung connections
-  │
-  ▼
-Routes                — authRouter, linksRouter, tagsRouter
-  │
-  ▼
-notFoundHandler       — 404 JSON response
-  │
-  ▼
-errorHandler          — 500 JSON response; stack trace in dev, message only in prod
+```mermaid
+flowchart TB
+    A([Request]) --> B["helmet — security headers"]
+    B --> C["cors — allow frontend origin"]
+    C --> D["requestLogger — pino-http + request ID"]
+    D --> E["rateLimiter — 1000/15min dev · 100/15min prod"]
+    E --> F["express.json / urlencoded — parse body"]
+    F --> G["cookieParser — parse cookies"]
+    G --> H["csrfGuard — require X-Requested-With"]
+    H --> I["loadSession — attach req.user"]
+    I --> J["res.setTimeout — 30s limit"]
+    J --> K["Routes — auth / links / tags"]
+    K --> L["notFoundHandler — 404"]
+    L --> M["errorHandler — 500"]
+    M --> N([Response])
 ```
 
 **CSRF protection approach:**
