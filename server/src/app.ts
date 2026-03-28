@@ -119,7 +119,7 @@ export function startServer(): void {
   });
 
   const server = app.listen(PORT, HOST, () =>
-    logger.info({ port: PORT }, 'Server running'),
+    logger.info({ port: PORT }, 'Link saver ai summarizer server is running'),
   );
 
   async function shutdown(signal: string) {

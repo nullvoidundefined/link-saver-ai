@@ -104,7 +104,12 @@ export async function logout(req: Request, res: Response): Promise<void> {
   }
   const userId = req.user?.id;
   logger.info({ event: 'logout', userId, ip: req.ip }, 'User logged out');
-  res.clearCookie(SESSION_COOKIE_NAME, { path: '/' });
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    path: '/',
+    sameSite: isProduction() ? ('none' as const) : ('lax' as const),
+    secure: isProduction(),
+  });
   res.status(204).send();
 }
 

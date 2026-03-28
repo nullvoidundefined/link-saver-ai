@@ -10,7 +10,7 @@ if (isProduction() && !process.env.RATE_LIMIT_STORAGE_URI) {
 
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: isProduction() ? 100 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -18,7 +18,7 @@ export const rateLimiter = rateLimit({
 /** Stricter limit for auth routes to resist credential stuffing. */
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: isProduction() ? 10 : 100,
   standardHeaders: true,
   legacyHeaders: false,
 });

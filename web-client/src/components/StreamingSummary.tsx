@@ -8,6 +8,7 @@ interface StreamingSummaryProps {
   linkId: string;
   existingSummary?: string | null;
   summaryStatus?: string;
+  onComplete?: (summary: string) => void;
 }
 
 type Status = 'idle' | 'connecting' | 'streaming' | 'complete' | 'error';
@@ -16,6 +17,7 @@ export default function StreamingSummary({
   linkId,
   existingSummary,
   summaryStatus,
+  onComplete,
 }: StreamingSummaryProps) {
   const [text, setText] = useState(existingSummary || '');
   const [status, setStatus] = useState<Status>(
@@ -40,6 +42,8 @@ export default function StreamingSummary({
     setTokenUsage(null);
     setStatus('connecting');
 
+    let accumulated = '';
+
     const url = getSSEUrl(`/links/${linkId}/summary`);
     const es = new EventSource(url, { withCredentials: true });
     eventSourceRef.current = es;
@@ -62,9 +66,11 @@ export default function StreamingSummary({
         };
 
         if (data.type === 'cached' && data.summary) {
+          accumulated = data.summary;
           setText(data.summary);
           setIsCached(true);
         } else if (data.type === 'token' && data.token) {
+          accumulated += data.token;
           setText((prev) => prev + data.token);
         } else if (data.type === 'done') {
           if (data.usage) {
@@ -72,6 +78,7 @@ export default function StreamingSummary({
           }
           setStatus('complete');
           es.close();
+          onComplete?.(accumulated);
         } else if (data.type === 'error') {
           setError(data.message || 'Summary generation failed');
           setStatus('error');
@@ -89,7 +96,7 @@ export default function StreamingSummary({
       }
       es.close();
     };
-  }, [linkId, status]);
+  }, [linkId, status, onComplete]);
 
   const handleResummarize = useCallback(async () => {
     try {

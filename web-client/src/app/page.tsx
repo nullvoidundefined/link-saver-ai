@@ -128,11 +128,7 @@ function Dashboard() {
     if (selectedLink) {
       fetchLinkTags(selectedLink.id);
     }
-    // Refresh all link tags for filtering
-    if (links.length > 0) {
-      fetchAllLinkTags(links);
-    }
-  }, [fetchAllTags, fetchLinkTags, fetchAllLinkTags, selectedLink, links]);
+  }, [fetchAllTags, fetchLinkTags, selectedLink]);
 
   const handleDelete = useCallback(
     async (linkId: string) => {
@@ -463,6 +459,20 @@ function Dashboard() {
                 linkId={selectedLink.id}
                 existingSummary={selectedLink.summary}
                 summaryStatus={selectedLink.summary_status}
+                onComplete={(summary) => {
+                  setLinks((prev) =>
+                    prev.map((l) =>
+                      l.id === selectedLink.id
+                        ? { ...l, summary, summary_status: 'complete' }
+                        : l,
+                    ),
+                  );
+                  setSelectedLink((prev) =>
+                    prev?.id === selectedLink.id
+                      ? { ...prev, summary, summary_status: 'complete' }
+                      : prev,
+                  );
+                }}
               />
             </div>
           ) : (

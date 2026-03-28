@@ -10,6 +10,7 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
+
   const status = 500;
   const isProd = process.env.NODE_ENV === 'production';
 

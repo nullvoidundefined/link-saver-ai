@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "link-saver-ai-summarizer-server",
   "version": "1.0.0",
   "type": "module",
   "engines": {

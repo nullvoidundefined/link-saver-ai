@@ -1,5 +1,6 @@
 import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
 import * as authRepo from 'app/repositories/auth/auth.js';
+import { logger } from 'app/utils/logs/logger.js';
 import type { NextFunction, Request, Response } from 'express';
 
 export async function loadSession(
@@ -16,8 +17,10 @@ export async function loadSession(
     const user = await authRepo.getSessionWithUser(token);
     if (user) req.user = user;
   } catch (err) {
-    next(err);
-    return;
+    logger.error(
+      { err },
+      'Session lookup failed, continuing as unauthenticated',
+    );
   }
   next();
 }
