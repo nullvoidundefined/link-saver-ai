@@ -98,7 +98,7 @@ Each link shows its summary status with color-coded badges:
 ### Monorepo Structure
 
 ```
-application/
+link-saver-ai-summarizer/
 ├── server/           Express API (Railway)
 │   ├── src/
 │   │   ├── routes/         API route definitions
