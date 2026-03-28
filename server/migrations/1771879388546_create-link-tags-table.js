@@ -4,30 +4,30 @@
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  */
 export const up = (pgm) => {
-  pgm.createTable("link_tags", {
+  pgm.createTable('link_tags', {
     link_id: {
-      type: "uuid",
+      type: 'uuid',
       notNull: true,
-      references: "links",
-      onDelete: "CASCADE",
+      references: 'links',
+      onDelete: 'CASCADE',
     },
     tag_id: {
-      type: "uuid",
+      type: 'uuid',
       notNull: true,
-      references: "tags",
-      onDelete: "CASCADE",
+      references: 'tags',
+      onDelete: 'CASCADE',
     },
-    created_at: { type: "timestamptz", default: pgm.func("NOW()") },
+    created_at: { type: 'timestamptz', default: pgm.func('NOW()') },
   });
 
-  pgm.addConstraint("link_tags", "link_tags_pkey", {
-    primaryKey: ["link_id", "tag_id"],
+  pgm.addConstraint('link_tags', 'link_tags_pkey', {
+    primaryKey: ['link_id', 'tag_id'],
   });
 
-  pgm.createIndex("link_tags", "tag_id");
+  pgm.createIndex('link_tags', 'tag_id');
 };
 
 /** @param pgm {import('node-pg-migrate').MigrationBuilder} */
 export const down = (pgm) => {
-  pgm.dropTable("link_tags");
+  pgm.dropTable('link_tags');
 };

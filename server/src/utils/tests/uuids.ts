@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import crypto from 'node:crypto';
 
 /** Returns a new UUID v4 for use in tests. */
 export function uuid(): string {

@@ -1,4 +1,4 @@
-import { query } from "app/db/pool/pool.js";
+import { query } from 'app/db/pool/pool.js';
 
 export interface LinkRow {
   id: string;
@@ -29,21 +29,24 @@ export async function createLink(
     [userId, url, urlHash, title, domain, fetchedContent],
   );
   const row = result.rows[0];
-  if (!row) throw new Error("Insert returned no row");
+  if (!row) throw new Error('Insert returned no row');
   return row;
 }
 
-export async function getLinkById(linkId: string, userId: string): Promise<LinkRow | null> {
-  const result = await query<LinkRow>("SELECT * FROM links WHERE id = $1 AND user_id = $2", [
-    linkId,
-    userId,
-  ]);
+export async function getLinkById(
+  linkId: string,
+  userId: string,
+): Promise<LinkRow | null> {
+  const result = await query<LinkRow>(
+    'SELECT * FROM links WHERE id = $1 AND user_id = $2',
+    [linkId, userId],
+  );
   return result.rows[0] ?? null;
 }
 
 export async function getLinksByUserId(userId: string): Promise<LinkRow[]> {
   const result = await query<LinkRow>(
-    "SELECT * FROM links WHERE user_id = $1 ORDER BY created_at DESC",
+    'SELECT * FROM links WHERE user_id = $1 ORDER BY created_at DESC',
     [userId],
   );
   return result.rows;
@@ -54,14 +57,16 @@ export async function updateLinkSummary(
   summary: string,
   status: string,
 ): Promise<void> {
-  await query("UPDATE links SET summary = $1, summary_status = $2 WHERE id = $3", [
-    summary,
-    status,
-    linkId,
-  ]);
+  await query(
+    'UPDATE links SET summary = $1, summary_status = $2 WHERE id = $3',
+    [summary, status, linkId],
+  );
 }
 
-export async function searchLinks(userId: string, searchQuery: string): Promise<LinkRow[]> {
+export async function searchLinks(
+  userId: string,
+  searchQuery: string,
+): Promise<LinkRow[]> {
   const pattern = `%${searchQuery}%`;
   const result = await query<LinkRow>(
     `SELECT DISTINCT l.* FROM links l
@@ -75,8 +80,14 @@ export async function searchLinks(userId: string, searchQuery: string): Promise<
   return result.rows;
 }
 
-export async function deleteLink(linkId: string, userId: string): Promise<boolean> {
-  const result = await query("DELETE FROM links WHERE id = $1 AND user_id = $2", [linkId, userId]);
+export async function deleteLink(
+  linkId: string,
+  userId: string,
+): Promise<boolean> {
+  const result = await query(
+    'DELETE FROM links WHERE id = $1 AND user_id = $2',
+    [linkId, userId],
+  );
   return (result.rowCount ?? 0) > 0;
 }
 
@@ -86,7 +97,7 @@ export async function updateLink(
   fields: { title?: string },
 ): Promise<LinkRow | null> {
   const result = await query<LinkRow>(
-    "UPDATE links SET title = COALESCE($1, title) WHERE id = $2 AND user_id = $3 RETURNING *",
+    'UPDATE links SET title = COALESCE($1, title) WHERE id = $2 AND user_id = $3 RETURNING *',
     [fields.title ?? null, linkId, userId],
   );
   return result.rows[0] ?? null;
@@ -97,9 +108,8 @@ export async function updateLinkContent(
   content: string,
   title: string | null,
 ): Promise<void> {
-  await query("UPDATE links SET fetched_content = $1, title = COALESCE($2, title) WHERE id = $3", [
-    content,
-    title,
-    linkId,
-  ]);
+  await query(
+    'UPDATE links SET fetched_content = $1, title = COALESCE($2, title) WHERE id = $3',
+    [content, title, linkId],
+  );
 }

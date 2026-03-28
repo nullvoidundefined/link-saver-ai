@@ -10,6 +10,7 @@
     "dev": "pnpm --parallel run dev",
     "build": "pnpm --filter server build && pnpm --filter web-client build",
     "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
     "format": "pnpm -r run format",
     "format:check": "pnpm -r run format:check",
     "test": "pnpm --filter server run test",

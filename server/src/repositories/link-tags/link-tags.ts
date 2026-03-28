@@ -1,7 +1,10 @@
-import { query } from "app/db/pool/pool.js";
-import type { TagRow } from "app/repositories/tags/tags.js";
+import { query } from 'app/db/pool/pool.js';
+import type { TagRow } from 'app/repositories/tags/tags.js';
 
-export async function addTagToLink(linkId: string, tagId: string): Promise<void> {
+export async function addTagToLink(
+  linkId: string,
+  tagId: string,
+): Promise<void> {
   await query(
     `INSERT INTO link_tags (link_id, tag_id)
      VALUES ($1, $2)
@@ -10,11 +13,14 @@ export async function addTagToLink(linkId: string, tagId: string): Promise<void>
   );
 }
 
-export async function removeTagFromLink(linkId: string, tagId: string): Promise<boolean> {
-  const result = await query("DELETE FROM link_tags WHERE link_id = $1 AND tag_id = $2", [
-    linkId,
-    tagId,
-  ]);
+export async function removeTagFromLink(
+  linkId: string,
+  tagId: string,
+): Promise<boolean> {
+  const result = await query(
+    'DELETE FROM link_tags WHERE link_id = $1 AND tag_id = $2',
+    [linkId, tagId],
+  );
   return (result.rowCount ?? 0) > 0;
 }
 

@@ -1,6 +1,5 @@
-import { Redis } from "ioredis";
-
-import { logger } from "app/utils/logs/logger.js";
+import { logger } from 'app/utils/logs/logger.js';
+import { Redis } from 'ioredis';
 
 let redis: Redis | null = null;
 
@@ -9,7 +8,7 @@ export function getRedis(): Redis | null {
 
   const url = process.env.REDIS_URL;
   if (!url) {
-    logger.warn("REDIS_URL not set — caching disabled");
+    logger.warn('REDIS_URL not set — caching disabled');
     return null;
   }
 
@@ -20,12 +19,12 @@ export function getRedis(): Redis | null {
     },
   });
 
-  redis.on("error", (err) => {
-    logger.error({ err }, "Redis connection error");
+  redis.on('error', (err) => {
+    logger.error({ err }, 'Redis connection error');
   });
 
-  redis.on("connect", () => {
-    logger.info("Connected to Redis");
+  redis.on('connect', () => {
+    logger.info('Connected to Redis');
   });
 
   return redis;
