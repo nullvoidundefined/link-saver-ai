@@ -1,12 +1,7 @@
 'use client';
 
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { createContext, useCallback, useContext } from 'react';
 import type { ReactNode } from 'react';
 
 import { api } from '@/lib/api';
@@ -27,40 +22,59 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        api.get<{ user: User }>('/auth/me')
-            .then((res) => setUser(res.user))
-            .catch(() => setUser(null))
-            .finally(() => setLoading(false));
-    }, []);
+    const { data, isLoading } = useQuery({
+        queryKey: ['auth', 'me'],
+        queryFn: async () => {
+            try {
+                const res = await api.get<{ user: User }>('/auth/me');
+                return res.user;
+            } catch {
+                return null;
+            }
+        },
+        retry: false,
+        staleTime: Infinity,
+    });
 
-    const login = useCallback(async (email: string, password: string) => {
-        const res = await api.post<{ user: User }>('/auth/login', {
-            email,
-            password,
-        });
-        setUser(res.user);
-    }, []);
+    const login = useCallback(
+        async (email: string, password: string) => {
+            const res = await api.post<{ user: User }>('/auth/login', {
+                email,
+                password,
+            });
+            queryClient.setQueryData(['auth', 'me'], res.user);
+        },
+        [queryClient],
+    );
 
-    const register = useCallback(async (email: string, password: string) => {
-        const res = await api.post<{ user: User }>('/auth/register', {
-            email,
-            password,
-        });
-        setUser(res.user);
-    }, []);
+    const register = useCallback(
+        async (email: string, password: string) => {
+            const res = await api.post<{ user: User }>('/auth/register', {
+                email,
+                password,
+            });
+            queryClient.setQueryData(['auth', 'me'], res.user);
+        },
+        [queryClient],
+    );
 
     const logout = useCallback(async () => {
         await api.post('/auth/logout', {});
-        setUser(null);
-    }, []);
+        queryClient.setQueryData(['auth', 'me'], null);
+        queryClient.clear();
+    }, [queryClient]);
 
     return (
         <AuthContext.Provider
-            value={{ user, loading, login, register, logout }}
+            value={{
+                user: data ?? null,
+                loading: isLoading,
+                login,
+                register,
+                logout,
+            }}
         >
             {children}
         </AuthContext.Provider>

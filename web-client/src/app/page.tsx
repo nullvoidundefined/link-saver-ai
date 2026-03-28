@@ -8,7 +8,7 @@ import StreamingSummary from '@/components/StreamingSummary';
 import TagManager from '@/components/TagManager';
 import type { Tag } from '@/components/TagManager';
 import { api } from '@/lib/api';
-import { AuthProvider, useAuth } from '@/lib/auth';
+import { useAuth } from '@/lib/auth';
 
 interface Link {
     id: string;
@@ -498,9 +498,5 @@ function Dashboard() {
 }
 
 export default function Home() {
-    return (
-        <AuthProvider>
-            <Dashboard />
-        </AuthProvider>
-    );
+    return <Dashboard />;
 }
