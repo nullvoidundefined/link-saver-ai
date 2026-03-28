@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 import AuthForm from '@/components/AuthForm';
@@ -178,6 +179,18 @@ function Dashboard() {
             gap: '1rem',
           }}
         >
+          <Link
+            href='/documents/summary'
+            style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'none' }}
+          >
+            Summary
+          </Link>
+          <Link
+            href='/documents/technical-overview'
+            style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'none' }}
+          >
+            Technical Overview
+          </Link>
           <span style={{ fontSize: '0.85rem', color: '#888' }}>
             {user.email}
           </span>
