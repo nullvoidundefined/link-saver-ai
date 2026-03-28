@@ -31,44 +31,32 @@ The application is a production-grade bookmark manager where saved URLs are auto
 
 ## 2. Architecture Overview
 
-```
-┌─────────────────────────────────────────────────┐
-│                  Browser (Vercel)                │
-│                                                 │
-│  Next.js 15 (App Router)                        │
-│  React 19 + TanStack Query                      │
-│  EventSource (SSE client)                       │
-└──────────────────┬──────────────────────────────┘
-                   │ HTTP + SSE (CORS)
-                   │
-┌──────────────────▼──────────────────────────────┐
-│              API Server (Railway)               │
-│                                                 │
-│  Express 5 + TypeScript                         │
-│  Layered architecture:                          │
-│    Routes → Handlers → Services → Repositories  │
-│  Middleware: helmet, cors, pino-http,           │
-│    rate-limit, cookie-parser, csrf-guard        │
-└─────────┬───────────────┬────────────────────────┘
-          │               │
-          │               │
-┌─────────▼──────┐  ┌─────▼──────────────────────┐
-│  PostgreSQL    │  │  Redis                      │
-│  (Neon)        │  │  (Railway)                  │
-│                │  │                             │
-│  users         │  │  summary:{url_hash}         │
-│  sessions      │  │    → cached summary text    │
-│  links         │  │    → 7-day TTL              │
-│  tags          │  │                             │
-│  link_tags     │  │  ratelimit:summary:{userId} │
-└────────────────┘  │    → INCR counter, 1hr TTL  │
-                    └─────────────────────────────┘
-                              │
-                    ┌─────────▼──────┐
-                    │  Anthropic API │
-                    │  Claude        │
-                    │  (SSE stream)  │
-                    └────────────────┘
+```mermaid
+graph TB
+    subgraph Vercel["Vercel — Frontend"]
+        Browser["Browser\nNext.js 15 · React 19\nTanStack Query · EventSource"]
+    end
+
+    subgraph Railway["Railway — API Server"]
+        API["Express 5 · TypeScript\nRoutes → Handlers → Services → Repos\nhelmet · cors · pino · rate-limit"]
+    end
+
+    subgraph Neon["Neon — PostgreSQL"]
+        DB[("users\nsessions\nlinks\ntags\nlink_tags")]
+    end
+
+    subgraph RedisHost["Railway — Redis"]
+        Redis[("summary:{url_hash}\n→ cached text · 7d TTL\n\nratelimit:summary:{userId}\n→ INCR counter · 1h TTL")]
+    end
+
+    Anthropic["Anthropic API\nClaude claude-sonnet-4\nSSE stream"]
+
+    Browser -- "HTTP REST + SSE\n(CORS)" --> API
+    API -- "SQL queries\n(node-postgres)" --> DB
+    API -- "GET/SET/INCR\n(ioredis)" --> Redis
+    API -- "Messages API\nstreaming SDK" --> Anthropic
+    Anthropic -- "token stream" --> API
+    API -- "SSE token events" --> Browser
 ```
 
 **Deployment targets:**

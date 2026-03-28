@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+
+import MarkdownViewer from '@/components/MarkdownViewer';
 
 const DOCS: Record<string, { file: string; title: string }> = {
   summary: { file: 'SUMMARY.md', title: 'Summary' },
@@ -41,16 +41,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
           ← Back to app
         </Link>
       </div>
-      <article
-        style={{
-          lineHeight: 1.7,
-          fontSize: '0.95rem',
-          color: 'var(--foreground)',
-        }}
-        className='markdown-body'
-      >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-      </article>
+      <MarkdownViewer content={content} />
     </div>
   );
 }
