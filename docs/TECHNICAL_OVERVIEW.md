@@ -33,30 +33,29 @@ The application is a production-grade bookmark manager where saved URLs are auto
 
 ```mermaid
 graph TB
-    subgraph Vercel["Vercel — Frontend"]
-        Browser["Browser\nNext.js 15 · React 19\nTanStack Query · EventSource"]
+    subgraph Vercel["Vercel"]
+        Browser["Next.js / React"]
     end
 
-    subgraph Railway["Railway — API Server"]
-        API["Express 5 · TypeScript\nRoutes → Handlers → Services → Repos\nhelmet · cors · pino · rate-limit"]
+    subgraph RailwayAPI["Railway"]
+        API["Express API"]
     end
 
-    subgraph Neon["Neon — PostgreSQL"]
-        DB[("users\nsessions\nlinks\ntags\nlink_tags")]
+    subgraph Neon["Neon"]
+        DB[("PostgreSQL")]
     end
 
-    subgraph RedisHost["Railway — Redis"]
-        Redis[("summary:{url_hash}\n→ cached text · 7d TTL\n\nratelimit:summary:{userId}\n→ INCR counter · 1h TTL")]
+    subgraph RailwayRedis["Railway"]
+        Redis[("Redis")]
     end
 
-    Anthropic["Anthropic API\nClaude claude-sonnet-4\nSSE stream"]
+    Anthropic["Anthropic Claude"]
 
-    Browser -- "HTTP REST + SSE\n(CORS)" --> API
-    API -- "SQL queries\n(node-postgres)" --> DB
-    API -- "GET/SET/INCR\n(ioredis)" --> Redis
-    API -- "Messages API\nstreaming SDK" --> Anthropic
-    Anthropic -- "token stream" --> API
-    API -- "SSE token events" --> Browser
+    Browser -- "REST" --> API
+    API -- "SSE" --> Browser
+    API --> DB
+    API --> Redis
+    API -- "streaming" --> Anthropic
 ```
 
 **Deployment targets:**
