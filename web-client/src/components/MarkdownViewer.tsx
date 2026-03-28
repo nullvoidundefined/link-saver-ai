@@ -4,6 +4,17 @@ import type { ComponentPropsWithoutRef } from 'react';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import toml from 'react-syntax-highlighter/dist/esm/languages/prism/toml';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+
+SyntaxHighlighter.registerLanguage('sql', sql);
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('toml', toml);
+SyntaxHighlighter.registerLanguage('bash', bash);
 
 const MermaidDiagram = dynamic(() => import('./MermaidDiagram'), { ssr: false });
 
@@ -42,6 +53,18 @@ export default function MarkdownViewer({ content }: { content: string }) {
             const language = /language-(\w+)/.exec(className ?? '')?.[1];
             if (language === 'mermaid') {
               return <MermaidDiagram chart={String(children).trim()} />;
+            }
+            if (language) {
+              return (
+                <SyntaxHighlighter
+                  language={language}
+                  style={vscDarkPlus}
+                  PreTag='div'
+                  customStyle={{ borderRadius: '8px', fontSize: '0.85rem', margin: '1rem 0' }}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              );
             }
             return <code className={className}>{children}</code>;
           },
