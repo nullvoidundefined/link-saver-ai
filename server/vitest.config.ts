@@ -20,6 +20,7 @@ export default defineConfig({
         "**/*.d.ts",
         "**/*.test.ts",
         "src/index.ts",
+        "src/app.ts",
         "src/constants/**",
         "src/services/**",
         "src/prompts/**",
