@@ -1,5 +1,6 @@
 import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
 import * as authRepo from 'app/repositories/auth/auth.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -31,8 +32,7 @@ export function requireAuth(
   next: NextFunction,
 ): void {
   if (!req.user) {
-    res.status(401).json({ error: { message: 'Authentication required' } });
-    return;
+    throw ApiError.unauthorized();
   }
   next();
 }

@@ -6,6 +6,7 @@ import {
   cacheSummary,
   getCachedSummary,
 } from 'app/services/summary-cache.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import { parseIdParam } from 'app/utils/parsers/parseIdParam.js';
 import type { Request, Response } from 'express';
@@ -17,14 +18,12 @@ export async function streamLinkSummary(
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   // If we don't have fetched content yet, fetch it now
@@ -36,18 +35,12 @@ export async function streamLinkSummary(
       await linksRepo.updateLinkContent(linkId, content, extracted.title);
     } catch (err) {
       logger.error({ err, linkId }, 'Failed to fetch content for summary');
-      res
-        .status(500)
-        .json({ error: { message: 'Failed to fetch page content' } });
-      return;
+      throw ApiError.internal('Failed to fetch page content');
     }
   }
 
   if (!content || content.trim().length === 0) {
-    res
-      .status(422)
-      .json({ error: { message: 'No content available to summarize' } });
-    return;
+    throw new ApiError(422, 'NO_CONTENT', 'No content available to summarize');
   }
 
   // Check Redis cache before hitting the LLM
@@ -125,14 +118,12 @@ export async function resummarize(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   await bustSummaryCache(link.url_hash);

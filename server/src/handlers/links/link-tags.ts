@@ -1,6 +1,7 @@
 import * as linkTagsRepo from 'app/repositories/link-tags/link-tags.js';
 import * as linksRepo from 'app/repositories/links/links.js';
 import * as tagsRepo from 'app/repositories/tags/tags.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import { parseIdParam } from 'app/utils/parsers/parseIdParam.js';
 import type { Request, Response } from 'express';
@@ -9,14 +10,12 @@ export async function addTag(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   const tagId = typeof req.body?.tagId === 'string' ? req.body.tagId : null;
   if (!tagId) {
-    res.status(400).json({ error: { message: 'tagId is required' } });
-    return;
+    throw ApiError.badRequest('tagId is required');
   }
 
   // Verify both link and tag belong to this user
@@ -26,12 +25,10 @@ export async function addTag(req: Request, res: Response): Promise<void> {
   ]);
 
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
   if (!tag) {
-    res.status(404).json({ error: { message: 'Tag not found' } });
-    return;
+    throw ApiError.notFound('Tag not found');
   }
 
   await linkTagsRepo.addTagToLink(linkId, tagId);
@@ -50,21 +47,18 @@ export async function removeTag(req: Request, res: Response): Promise<void> {
   const tagId = parseIdParam(req.params.tagId);
 
   if (!linkId || !tagId) {
-    res.status(400).json({ error: { message: 'Invalid link or tag ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link or tag ID');
   }
 
   // Verify link belongs to user
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   const deleted = await linkTagsRepo.removeTagFromLink(linkId, tagId);
   if (!deleted) {
-    res.status(404).json({ error: { message: 'Tag association not found' } });
-    return;
+    throw ApiError.notFound('Tag association not found');
   }
 
   logger.info(
@@ -78,14 +72,12 @@ export async function listTags(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   const tags = await linkTagsRepo.getTagsForLink(linkId);

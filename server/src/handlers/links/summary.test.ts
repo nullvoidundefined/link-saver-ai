@@ -72,7 +72,7 @@ describe('streamLinkSummary', () => {
     const res = await request(createApp()).get(`/links/${linkId}/summary`);
 
     expect(res.status).toBe(404);
-    expect(res.body.error.message).toBe('Link not found');
+    expect(res.body.message).toBe('Link not found');
   });
 
   it('returns cached summary instantly via SSE on cache hit', async () => {
@@ -201,6 +201,6 @@ describe('streamLinkSummary', () => {
     const res = await request(createApp()).get(`/links/${linkId}/summary`);
 
     expect(res.status).toBe(422);
-    expect(res.body.error.message).toBe('No content available to summarize');
+    expect(res.body.message).toBe('No content available to summarize');
   });
 });
