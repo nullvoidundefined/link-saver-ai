@@ -17,12 +17,9 @@ function createApp() {
   app.get('/boom', (_req: Request, _res: Response, next: NextFunction) => {
     next(new Error('kaboom'));
   });
-  app.get(
-    '/not-found',
-    (_req: Request, _res: Response, next: NextFunction) => {
-      next(ApiError.notFound('Widget not found'));
-    },
-  );
+  app.get('/not-found', (_req: Request, _res: Response, next: NextFunction) => {
+    next(ApiError.notFound('Widget not found'));
+  });
   app.get(
     '/bad-request-details',
     (_req: Request, _res: Response, next: NextFunction) => {

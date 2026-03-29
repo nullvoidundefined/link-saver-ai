@@ -42,37 +42,53 @@ a {
 }
 
 .markdown-body {
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-weight: 600;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
     line-height: 1.3;
   }
 
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.3rem; }
-  h3 { font-size: 1.1rem; }
+  h1 {
+    font-size: 1.75rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.3rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+  }
 
-  p { margin-bottom: 0.85rem; }
+  p {
+    margin-bottom: 0.85rem;
+  }
 
-  ul, ol {
+  ul,
+  ol {
     padding-left: 1.5rem;
     margin-bottom: 0.85rem;
   }
 
-  li { margin-bottom: 0.25rem; }
+  li {
+    margin-bottom: 0.25rem;
+  }
 
   code {
     font-family: var(--font-geist-mono), monospace;
     font-size: 0.85em;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     padding: 0.15em 0.4em;
     border-radius: 4px;
   }
 
   pre {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 1rem;
     overflow-x: auto;
@@ -91,26 +107,33 @@ a {
     font-size: 0.9rem;
   }
 
-  th, td {
+  th,
+  td {
     padding: 0.5rem 0.75rem;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     text-align: left;
   }
 
-  th { background: rgba(255,255,255,0.05); font-weight: 600; }
+  th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+  }
 
   blockquote {
-    border-left: 3px solid rgba(255,255,255,0.2);
+    border-left: 3px solid rgba(255, 255, 255, 0.2);
     padding-left: 1rem;
     color: #888;
     margin-bottom: 0.85rem;
   }
 
-  a { color: #0070f3; text-decoration: underline; }
+  a {
+    color: #0070f3;
+    text-decoration: underline;
+  }
 
   hr {
     border: none;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 1.5rem 0;
   }
 }
