@@ -1,3 +1,4 @@
+import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { AuthProvider } from '@/lib/auth';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
@@ -31,7 +32,7 @@ export default function RootLayout({
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider><ErrorBoundary>{children}</ErrorBoundary></AuthProvider>
         </QueryProvider>
         <Analytics />
         <SpeedInsights />
