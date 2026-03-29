@@ -2,6 +2,7 @@ import * as linksRepo from 'app/repositories/links/links.js';
 import { createLinkSchema, updateLinkSchema } from 'app/schemas/links.js';
 import { fetchContent } from 'app/services/content-fetcher.js';
 import { bustSummaryCache } from 'app/services/summary-cache.js';
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import { parseIdParam } from 'app/utils/parsers/parseIdParam.js';
 import type { Request, Response } from 'express';
@@ -11,8 +12,7 @@ export async function create(req: Request, res: Response): Promise<void> {
   const parsed = createLinkSchema.safeParse(req.body);
   if (!parsed.success) {
     const message = parsed.error.issues.map((e) => e.message).join('; ');
-    res.status(400).json({ error: { message } });
-    return;
+    throw ApiError.badRequest(message);
   }
 
   const userId = req.user!.id;
@@ -57,13 +57,11 @@ export async function getById(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
   res.json({ data: link });
 }
@@ -72,21 +70,18 @@ export async function update(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   const parsed = updateLinkSchema.safeParse(req.body);
   if (!parsed.success) {
     const message = parsed.error.issues.map((e) => e.message).join('; ');
-    res.status(400).json({ error: { message } });
-    return;
+    throw ApiError.badRequest(message);
   }
 
   const link = await linksRepo.updateLink(linkId, userId, parsed.data);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   logger.info({ event: 'link_updated', linkId, userId }, 'Link updated');
@@ -97,15 +92,13 @@ export async function remove(req: Request, res: Response): Promise<void> {
   const userId = req.user!.id;
   const linkId = parseIdParam(req.params.id);
   if (!linkId) {
-    res.status(400).json({ error: { message: 'Invalid link ID' } });
-    return;
+    throw ApiError.badRequest('Invalid link ID');
   }
 
   // Fetch the link first so we can bust the summary cache
   const link = await linksRepo.getLinkById(linkId, userId);
   if (!link) {
-    res.status(404).json({ error: { message: 'Link not found' } });
-    return;
+    throw ApiError.notFound('Link not found');
   }
 
   await linksRepo.deleteLink(linkId, userId);

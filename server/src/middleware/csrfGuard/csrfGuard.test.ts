@@ -1,7 +1,12 @@
 import { csrfGuard } from 'app/middleware/csrfGuard/csrfGuard.js';
+import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import express from 'express';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('app/utils/logs/logger.js', () => ({
+  logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
+}));
 
 const app = express();
 app.use(express.json());
@@ -11,6 +16,7 @@ app.post('/post-ok', (_req, res) => res.status(200).json({ ok: true }));
 app.put('/put-ok', (_req, res) => res.status(200).json({ ok: true }));
 app.patch('/patch-ok', (_req, res) => res.status(200).json({ ok: true }));
 app.delete('/delete-ok', (_req, res) => res.status(200).json({ ok: true }));
+app.use(errorHandler);
 
 describe('csrfGuard', () => {
   it('allows GET without X-Requested-With', async () => {
@@ -22,7 +28,7 @@ describe('csrfGuard', () => {
   it('rejects POST without X-Requested-With with 403', async () => {
     const res = await request(app).post('/post-ok').send({});
     expect(res.status).toBe(403);
-    expect(res.body.error.message).toBe('Missing X-Requested-With header');
+    expect(res.body.message).toBe('Missing X-Requested-With header');
   });
 
   it('allows POST with X-Requested-With header', async () => {

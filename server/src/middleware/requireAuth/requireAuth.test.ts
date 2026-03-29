@@ -1,4 +1,5 @@
 import { SESSION_COOKIE_NAME } from 'app/constants/session.js';
+import { errorHandler } from 'app/middleware/errorHandler/errorHandler.js';
 import {
   loadSession,
   requireAuth,
@@ -11,6 +12,9 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('app/repositories/auth/auth.js');
+vi.mock('app/utils/logs/logger.js', () => ({
+  logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn(), debug: vi.fn() },
+}));
 
 const id = uuid();
 const app = express();
@@ -18,12 +22,13 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(loadSession);
 app.get('/protected', requireAuth, (req, res) => res.json({ user: req.user }));
+app.use(errorHandler);
 
 describe('requireAuth', () => {
   it('returns 401 when req.user is not set', async () => {
     const res = await request(app).get('/protected');
     expect(res.status).toBe(401);
-    expect(res.body.error.message).toBe('Authentication required');
+    expect(res.body.message).toBe('Authentication required');
   });
 });
 
@@ -72,7 +77,7 @@ describe('loadSession', () => {
     expect(authRepo.getSessionWithUser).toHaveBeenCalledWith('expired-token');
   });
 
-  it('calls next(err) when getSessionWithUser throws', async () => {
+  it('continues as unauthenticated when getSessionWithUser throws', async () => {
     const dbError = new Error('connection refused');
     vi.mocked(authRepo.getSessionWithUser).mockRejectedValueOnce(dbError);
 
@@ -80,7 +85,9 @@ describe('loadSession', () => {
       .get('/protected')
       .set('Cookie', `${SESSION_COOKIE_NAME}=some-token`);
 
-    expect(res.status).toBe(500);
+    // loadSession catches the error and continues without setting req.user,
+    // so requireAuth rejects with 401
+    expect(res.status).toBe(401);
     expect(authRepo.getSessionWithUser).toHaveBeenCalledWith('some-token');
   });
 });

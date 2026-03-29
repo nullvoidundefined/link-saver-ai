@@ -1,8 +1,8 @@
+import { ApiError } from 'app/utils/ApiError.js';
 import { logger } from 'app/utils/logs/logger.js';
 import type { NextFunction, Request, Response } from 'express';
 
 // Centralized error handler to ensure all uncaught errors are logged once and surfaced with a safe JSON response.
-// The full error is only exposed in non-production environments to avoid leaking implementation details.
 
 export function errorHandler(
   err: unknown,
@@ -10,18 +10,23 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
-  const status = 500;
-  const isProd = process.env.NODE_ENV === 'production';
+  if (err instanceof ApiError) {
+    logger.error(
+      { err, reqId: req.id, statusCode: err.statusCode, errorCode: err.code },
+      'Request failed',
+    );
+    res.status(err.statusCode).json({
+      error: err.code,
+      message: err.message,
+      ...(err.details ? { details: err.details } : {}),
+    });
+    return;
+  }
 
+  // Unknown errors
   logger.error({ err, reqId: req.id }, 'Unhandled error in request handler');
-
-  res.status(status).json({
-    error: {
-      message: isProd
-        ? 'Internal server error'
-        : err instanceof Error
-          ? err.stack
-          : String(err),
-    },
+  res.status(500).json({
+    error: 'INTERNAL_ERROR',
+    message: 'Internal server error',
   });
 }

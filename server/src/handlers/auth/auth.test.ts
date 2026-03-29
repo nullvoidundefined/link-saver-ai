@@ -91,7 +91,7 @@ describe('auth handlers', () => {
         .send({ email: 'user@example.com', password: 'password123' });
 
       expect(res.status).toBe(409);
-      expect(res.body.error.message).toBe('Email already registered');
+      expect(res.body.message).toBe('Email already registered');
     });
     it('returns 500 on other errors', async () => {
       vi.mocked(authRepo.createUserAndSession).mockRejectedValueOnce(
@@ -103,7 +103,7 @@ describe('auth handlers', () => {
         .send({ email: 'user@example.com', password: 'password123' });
 
       expect(res.status).toBe(500);
-      expect(res.body.error.message).toBeDefined();
+      expect(res.body.error).toBe('INTERNAL_ERROR');
     });
   });
 
@@ -121,7 +121,7 @@ describe('auth handlers', () => {
         .send({ email: 'nobody@example.com', password: 'any' });
 
       expect(res.status).toBe(401);
-      expect(res.body.error.message).toBe('Invalid email or password');
+      expect(res.body.message).toBe('Invalid email or password');
     });
     it('returns 401 when password invalid', async () => {
       vi.mocked(authRepo.findUserByEmail).mockResolvedValueOnce(mockUser);
@@ -132,7 +132,7 @@ describe('auth handlers', () => {
         .send({ email: 'user@example.com', password: 'wrong' });
 
       expect(res.status).toBe(401);
-      expect(res.body.error.message).toBe('Invalid email or password');
+      expect(res.body.message).toBe('Invalid email or password');
     });
     it('returns 200 and sets cookie when valid', async () => {
       vi.mocked(authRepo.findUserByEmail).mockResolvedValueOnce(mockUser);
@@ -162,7 +162,7 @@ describe('auth handlers', () => {
         .send({ email: 'user@example.com', password: 'password123' });
 
       expect(res.status).toBe(500);
-      expect(res.body.error.message).toBeDefined();
+      expect(res.body.error).toBe('INTERNAL_ERROR');
     });
   });
 
@@ -199,7 +199,7 @@ describe('auth handlers', () => {
     it('returns 401 when not authenticated', async () => {
       const res = await request(app).get('/me');
       expect(res.status).toBe(401);
-      expect(res.body.error.message).toBe('Authentication required');
+      expect(res.body.message).toBe('Authentication required');
     });
     it('returns 200 with user when req.user set', async () => {
       const res = await request(app).get('/me').set('x-test-user', '1');
