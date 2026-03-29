@@ -1,20 +1,26 @@
+import MarkdownViewer from '@/components/MarkdownViewer';
 import fs from 'fs/promises';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
 
-import MarkdownViewer from '@/components/MarkdownViewer';
-
 const DOCS: Record<string, { file: string; title: string }> = {
   summary: { file: 'SUMMARY.md', title: 'Summary' },
-  'technical-overview': { file: 'TECHNICAL_OVERVIEW.md', title: 'Technical Overview' },
+  'technical-overview': {
+    file: 'TECHNICAL_OVERVIEW.md',
+    title: 'Technical Overview',
+  },
 };
 
 export function generateStaticParams() {
   return Object.keys(DOCS).map((id) => ({ id }));
 }
 
-export default async function DocumentPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DocumentPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const doc = DOCS[id];
   if (!doc) notFound();

@@ -121,17 +121,17 @@ link-saver-ai-summarizer/
 
 ### Tech Stack
 
-| Layer | Technology | Deployment |
-|-------|-----------|------------|
-| Frontend | Next.js 15, React 19, TypeScript | Vercel |
-| API Server | Express 5, TypeScript, Pino logging | Railway |
-| Database | PostgreSQL, 5 tables | Neon |
-| Cache | Redis (ioredis), 7-day TTL | Railway |
-| AI | Anthropic Claude API (claude-sonnet-4-20250514), streaming | Anthropic |
-| Content Extraction | @extractus/article-extractor | — |
-| Auth | Custom session-based (bcrypt + HTTP-only cookies) | — |
-| Testing | Vitest, 96 tests, supertest for HTTP | — |
-| Dev Tools | ESLint, Prettier, Lefthook (git hooks), pnpm workspaces | — |
+| Layer              | Technology                                                 | Deployment |
+| ------------------ | ---------------------------------------------------------- | ---------- |
+| Frontend           | Next.js 15, React 19, TypeScript                           | Vercel     |
+| API Server         | Express 5, TypeScript, Pino logging                        | Railway    |
+| Database           | PostgreSQL, 5 tables                                       | Neon       |
+| Cache              | Redis (ioredis), 7-day TTL                                 | Railway    |
+| AI                 | Anthropic Claude API (claude-sonnet-4-20250514), streaming | Anthropic  |
+| Content Extraction | @extractus/article-extractor                               | —          |
+| Auth               | Custom session-based (bcrypt + HTTP-only cookies)          | —          |
+| Testing            | Vitest, 96 tests, supertest for HTTP                       | —          |
+| Dev Tools          | ESLint, Prettier, Lefthook (git hooks), pnpm workspaces    | —          |
 
 ### Database Schema (5 Tables)
 

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 import AuthForm from '@/components/AuthForm';
@@ -10,6 +9,7 @@ import TagManager from '@/components/TagManager';
 import type { Tag } from '@/components/TagManager';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import Link from 'next/link';
 
 interface Link {
   id: string;
@@ -181,13 +181,21 @@ function Dashboard() {
         >
           <Link
             href='/documents/summary'
-            style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'none' }}
+            style={{
+              fontSize: '0.85rem',
+              color: '#888',
+              textDecoration: 'none',
+            }}
           >
             Summary
           </Link>
           <Link
             href='/documents/technical-overview'
-            style={{ fontSize: '0.85rem', color: '#888', textDecoration: 'none' }}
+            style={{
+              fontSize: '0.85rem',
+              color: '#888',
+              textDecoration: 'none',
+            }}
           >
             Technical Overview
           </Link>

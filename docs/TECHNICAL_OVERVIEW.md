@@ -59,6 +59,7 @@ graph TB
 ```
 
 **Deployment targets:**
+
 - Frontend → Vercel (Next.js serverless)
 - API server → Railway (Docker container)
 - Database → Neon (serverless PostgreSQL)
@@ -68,22 +69,22 @@ graph TB
 
 ## 3. Tech Stack
 
-| Layer | Technology | Version | Notes |
-|---|---|---|---|
-| **Frontend framework** | Next.js | 15.x | App Router, no Pages Router |
-| **UI library** | React | 19.x | Concurrent features, Suspense |
-| **Language** | TypeScript | 5.x | Strict mode, `noUncheckedIndexedAccess` |
-| **API server** | Express | 5.x | Async error propagation built-in |
-| **Runtime** | Node.js | ≥ 22.0 | Required by both packages |
-| **Database** | PostgreSQL | 13+ | Hosted on Neon (serverless) |
-| **Cache** | Redis | — | Hosted on Railway, via ioredis |
-| **LLM** | Anthropic Claude | claude-sonnet-4-20250514 | Streaming SDK |
-| **Auth** | Custom sessions | — | bcrypt + HTTP-only cookies |
-| **Logging** | Pino | 10.x | JSON in prod, pino-pretty in dev |
-| **Validation** | Zod | 4.x | Schemas for all request bodies |
-| **Testing** | Vitest | 3.x | Unit + integration, supertest |
-| **Package manager** | pnpm | 9.x | Workspaces monorepo |
-| **Container** | Docker | — | Multi-stage build for production |
+| Layer                  | Technology       | Version                  | Notes                                   |
+| ---------------------- | ---------------- | ------------------------ | --------------------------------------- |
+| **Frontend framework** | Next.js          | 15.x                     | App Router, no Pages Router             |
+| **UI library**         | React            | 19.x                     | Concurrent features, Suspense           |
+| **Language**           | TypeScript       | 5.x                      | Strict mode, `noUncheckedIndexedAccess` |
+| **API server**         | Express          | 5.x                      | Async error propagation built-in        |
+| **Runtime**            | Node.js          | ≥ 22.0                   | Required by both packages               |
+| **Database**           | PostgreSQL       | 13+                      | Hosted on Neon (serverless)             |
+| **Cache**              | Redis            | —                        | Hosted on Railway, via ioredis          |
+| **LLM**                | Anthropic Claude | claude-sonnet-4-20250514 | Streaming SDK                           |
+| **Auth**               | Custom sessions  | —                        | bcrypt + HTTP-only cookies              |
+| **Logging**            | Pino             | 10.x                     | JSON in prod, pino-pretty in dev        |
+| **Validation**         | Zod              | 4.x                      | Schemas for all request bodies          |
+| **Testing**            | Vitest           | 3.x                      | Unit + integration, supertest           |
+| **Package manager**    | pnpm             | 9.x                      | Workspaces monorepo                     |
+| **Container**          | Docker           | —                        | Multi-stage build for production        |
 
 ---
 
@@ -93,47 +94,47 @@ graph TB
 
 **Runtime dependencies:**
 
-| Package | Purpose |
-|---|---|
-| `@anthropic-ai/sdk` | Streaming Claude API calls with AbortController support |
-| `@extractus/article-extractor` | Extracts clean article text from URLs (primary content fetcher) |
-| `@google-cloud/secret-manager` | Fetches secrets from GCP Secret Manager in production |
-| `bcrypt` | Password hashing with 12 salt rounds |
-| `cookie-parser` | Parses HTTP cookies into `req.cookies` |
-| `cors` | Cross-origin resource sharing middleware |
-| `dotenv` | Loads `.env` file into `process.env` |
-| `express` | HTTP framework (v5 — async errors propagated automatically) |
-| `express-rate-limit` | In-memory rate limiting; global (1000 dev / 100 prod per 15 min) and auth-specific (100 dev / 10 prod per 15 min) |
-| `helmet` | Sets security headers (XSS, clickjacking, MIME sniffing protection) |
-| `ioredis` | Redis client with auto-reconnect and pipeline support |
-| `node-pg-migrate` | Database migrations in JS |
-| `pg` | PostgreSQL client and connection pool |
-| `pino` | Structured JSON logger |
-| `pino-http` | HTTP request/response logging middleware |
-| `zod` | Runtime schema validation for all request bodies |
+| Package                        | Purpose                                                                                                           |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `@anthropic-ai/sdk`            | Streaming Claude API calls with AbortController support                                                           |
+| `@extractus/article-extractor` | Extracts clean article text from URLs (primary content fetcher)                                                   |
+| `@google-cloud/secret-manager` | Fetches secrets from GCP Secret Manager in production                                                             |
+| `bcrypt`                       | Password hashing with 12 salt rounds                                                                              |
+| `cookie-parser`                | Parses HTTP cookies into `req.cookies`                                                                            |
+| `cors`                         | Cross-origin resource sharing middleware                                                                          |
+| `dotenv`                       | Loads `.env` file into `process.env`                                                                              |
+| `express`                      | HTTP framework (v5 — async errors propagated automatically)                                                       |
+| `express-rate-limit`           | In-memory rate limiting; global (1000 dev / 100 prod per 15 min) and auth-specific (100 dev / 10 prod per 15 min) |
+| `helmet`                       | Sets security headers (XSS, clickjacking, MIME sniffing protection)                                               |
+| `ioredis`                      | Redis client with auto-reconnect and pipeline support                                                             |
+| `node-pg-migrate`              | Database migrations in JS                                                                                         |
+| `pg`                           | PostgreSQL client and connection pool                                                                             |
+| `pino`                         | Structured JSON logger                                                                                            |
+| `pino-http`                    | HTTP request/response logging middleware                                                                          |
+| `zod`                          | Runtime schema validation for all request bodies                                                                  |
 
 **Dev dependencies:**
 
-| Package | Purpose |
-|---|---|
-| `tsx` | TypeScript execution for development (`tsx watch`) |
-| `tsc-alias` | Resolves path aliases after `tsc` compilation |
-| `vitest` | Test runner |
-| `supertest` | HTTP assertion library for integration tests |
-| `pino-pretty` | Human-readable log formatting in development |
-| `eslint-plugin-security` | Security-focused ESLint rules |
-| `lefthook` | Git hook runner (pre-commit lint + format check) |
+| Package                  | Purpose                                            |
+| ------------------------ | -------------------------------------------------- |
+| `tsx`                    | TypeScript execution for development (`tsx watch`) |
+| `tsc-alias`              | Resolves path aliases after `tsc` compilation      |
+| `vitest`                 | Test runner                                        |
+| `supertest`              | HTTP assertion library for integration tests       |
+| `pino-pretty`            | Human-readable log formatting in development       |
+| `eslint-plugin-security` | Security-focused ESLint rules                      |
+| `lefthook`               | Git hook runner (pre-commit lint + format check)   |
 
 ### Web Client
 
-| Package | Purpose |
-|---|---|
-| `next` | React framework with App Router and SSR |
-| `react` / `react-dom` | UI library |
-| `@tanstack/react-query` | Server state management, caching, and synchronization |
-| `@vercel/analytics` | Page view and event tracking |
-| `@vercel/speed-insights` | Core Web Vitals monitoring |
-| `sass` | SCSS compilation for global styles |
+| Package                  | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
+| `next`                   | React framework with App Router and SSR               |
+| `react` / `react-dom`    | UI library                                            |
+| `@tanstack/react-query`  | Server state management, caching, and synchronization |
+| `@vercel/analytics`      | Page view and event tracking                          |
+| `@vercel/speed-insights` | Core Web Vitals monitoring                            |
+| `sass`                   | SCSS compilation for global styles                    |
 
 ---
 
@@ -238,6 +239,7 @@ link-saver-ai-summarizer/
 The database has five tables. All primary keys are UUIDs generated by PostgreSQL. Foreign keys use `ON DELETE CASCADE` throughout, so deleting a user removes all their data, and deleting a tag removes its junction table entries.
 
 ### `users`
+
 ```sql
 CREATE TABLE users (
   id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -250,6 +252,7 @@ CREATE TABLE users (
 ```
 
 ### `sessions`
+
 ```sql
 CREATE TABLE sessions (
   id         TEXT        PRIMARY KEY,    -- SHA256 hash of the raw session token
@@ -264,6 +267,7 @@ CREATE INDEX ON sessions (expires_at);
 The raw token is stored in the cookie; only its SHA256 hash is stored in the database. A compromised database cannot be used to impersonate sessions.
 
 ### `links`
+
 ```sql
 CREATE TABLE links (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -286,6 +290,7 @@ CREATE INDEX ON links (summary_status);
 ```
 
 ### `tags`
+
 ```sql
 CREATE TABLE tags (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -299,6 +304,7 @@ CREATE INDEX ON tags (user_id);
 ```
 
 ### `link_tags` (junction table)
+
 ```sql
 CREATE TABLE link_tags (
   link_id    UUID NOT NULL REFERENCES links ON DELETE CASCADE,
@@ -317,33 +323,34 @@ All routes require `Content-Type: application/json` and `X-Requested-With: XMLHt
 
 ### Authentication
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/auth/register` | No | Creates user + session. Body: `{ email, password }`. Returns `{ user }`. |
-| POST | `/auth/login` | No | Validates credentials, creates session. Returns `{ user }`. |
-| POST | `/auth/logout` | No | Deletes session from DB, clears cookie. Returns 204. |
-| GET | `/auth/me` | Yes | Returns `{ user }` for current session. |
+| Method | Path             | Auth | Description                                                              |
+| ------ | ---------------- | ---- | ------------------------------------------------------------------------ |
+| POST   | `/auth/register` | No   | Creates user + session. Body: `{ email, password }`. Returns `{ user }`. |
+| POST   | `/auth/login`    | No   | Validates credentials, creates session. Returns `{ user }`.              |
+| POST   | `/auth/logout`   | No   | Deletes session from DB, clears cookie. Returns 204.                     |
+| GET    | `/auth/me`       | Yes  | Returns `{ user }` for current session.                                  |
 
 Auth routes are rate-limited at 100/15 min (dev) or 10/15 min (prod).
 
 ### Links
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/links` | Yes | Creates a link. Fetches article content. Body: `{ url }`. |
-| GET | `/links` | Yes | Lists all user's links. Optional `?q=` for full-text search. |
-| GET | `/links/:id` | Yes | Returns a single link. |
-| PATCH | `/links/:id` | Yes | Updates link fields. Body: `{ title? }`. |
-| DELETE | `/links/:id` | Yes | Deletes link and busts its Redis cache entry. Returns 204. |
+| Method | Path         | Auth | Description                                                  |
+| ------ | ------------ | ---- | ------------------------------------------------------------ |
+| POST   | `/links`     | Yes  | Creates a link. Fetches article content. Body: `{ url }`.    |
+| GET    | `/links`     | Yes  | Lists all user's links. Optional `?q=` for full-text search. |
+| GET    | `/links/:id` | Yes  | Returns a single link.                                       |
+| PATCH  | `/links/:id` | Yes  | Updates link fields. Body: `{ title? }`.                     |
+| DELETE | `/links/:id` | Yes  | Deletes link and busts its Redis cache entry. Returns 204.   |
 
 ### Summary (SSE)
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/links/:id/summary` | Yes | Opens SSE stream. Returns events: `cached`, `token`, `done`, `error`. |
-| POST | `/links/:id/resummarize` | Yes | Busts Redis cache, resets status to `pending`. |
+| Method | Path                     | Auth | Description                                                           |
+| ------ | ------------------------ | ---- | --------------------------------------------------------------------- |
+| GET    | `/links/:id/summary`     | Yes  | Opens SSE stream. Returns events: `cached`, `token`, `done`, `error`. |
+| POST   | `/links/:id/resummarize` | Yes  | Busts Redis cache, resets status to `pending`.                        |
 
 SSE stream events:
+
 ```
 data: {"type":"cached","summary":"..."}   // Cache hit — immediate
 data: {"type":"token","token":"..."}       // Each streaming delta
@@ -355,28 +362,28 @@ Summary endpoints are rate-limited at 20 summaries/hour per user via Redis.
 
 ### Link Tags
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/links/:id/tags` | Yes | Assigns a tag to a link. Body: `{ tagId }`. |
-| GET | `/links/:id/tags` | Yes | Lists all tags assigned to a link. |
-| DELETE | `/links/:id/tags/:tagId` | Yes | Removes a tag from a link. Returns 204. |
+| Method | Path                     | Auth | Description                                 |
+| ------ | ------------------------ | ---- | ------------------------------------------- |
+| POST   | `/links/:id/tags`        | Yes  | Assigns a tag to a link. Body: `{ tagId }`. |
+| GET    | `/links/:id/tags`        | Yes  | Lists all tags assigned to a link.          |
+| DELETE | `/links/:id/tags/:tagId` | Yes  | Removes a tag from a link. Returns 204.     |
 
 ### Tags
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/tags` | Yes | Creates a tag. Body: `{ name, color? }`. |
-| GET | `/tags` | Yes | Lists all user's tags (sorted by name). |
-| GET | `/tags/:id` | Yes | Returns a single tag. |
-| PATCH | `/tags/:id` | Yes | Updates a tag. Body: `{ name?, color? }`. |
-| DELETE | `/tags/:id` | Yes | Deletes a tag; cascades to `link_tags`. Returns 204. |
+| Method | Path        | Auth | Description                                          |
+| ------ | ----------- | ---- | ---------------------------------------------------- |
+| POST   | `/tags`     | Yes  | Creates a tag. Body: `{ name, color? }`.             |
+| GET    | `/tags`     | Yes  | Lists all user's tags (sorted by name).              |
+| GET    | `/tags/:id` | Yes  | Returns a single tag.                                |
+| PATCH  | `/tags/:id` | Yes  | Updates a tag. Body: `{ name?, color? }`.            |
+| DELETE | `/tags/:id` | Yes  | Deletes a tag; cascades to `link_tags`. Returns 204. |
 
 ### Health
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/health` | No | Returns `{ status: "ok" }` immediately. |
-| GET | `/health/ready` | No | Queries DB; returns `{ status: "ok", db: "connected" }` or 503. |
+| Method | Path            | Auth | Description                                                     |
+| ------ | --------------- | ---- | --------------------------------------------------------------- |
+| GET    | `/health`       | No   | Returns `{ status: "ok" }` immediately.                         |
+| GET    | `/health/ready` | No   | Queries DB; returns `{ status: "ok", db: "connected" }` or 503. |
 
 ---
 
@@ -462,24 +469,24 @@ The component tracks an `accumulated` string in a closure variable (not React st
 
 **Summary cache:**
 
-| Property | Value |
-|---|---|
-| Key | `summary:{sha256(url)}` |
-| TTL | 7 days (604,800 seconds) |
-| Set | After successful stream completion |
-| Read | Before starting any LLM stream |
-| Busted | On `/resummarize` request or link deletion |
+| Property | Value                                      |
+| -------- | ------------------------------------------ |
+| Key      | `summary:{sha256(url)}`                    |
+| TTL      | 7 days (604,800 seconds)                   |
+| Set      | After successful stream completion         |
+| Read     | Before starting any LLM stream             |
+| Busted   | On `/resummarize` request or link deletion |
 
 The cache key is the SHA256 hash of the URL, not the link ID. This means the same URL will hit the same cache entry regardless of which user saved it — a foundation for eventual cross-user cache sharing.
 
 **Per-user summary rate limiting:**
 
-| Property | Value |
-|---|---|
-| Key | `ratelimit:summary:{userId}` |
-| Limit | 20 per hour |
-| Implementation | Redis INCR + EXPIRE |
-| Fail-open | Yes — if Redis is unavailable, requests are allowed through |
+| Property       | Value                                                       |
+| -------------- | ----------------------------------------------------------- |
+| Key            | `ratelimit:summary:{userId}`                                |
+| Limit          | 20 per hour                                                 |
+| Implementation | Redis INCR + EXPIRE                                         |
+| Fail-open      | Yes — if Redis is unavailable, requests are allowed through |
 
 ```typescript
 const current = await redis.incr(key);
@@ -556,8 +563,8 @@ If the extractor fails (paywalled site, JavaScript-heavy SPA, etc.), the server 
 ```typescript
 const html = await fetch(url, {
   signal: AbortSignal.timeout(15_000),
-  headers: { 'User-Agent': 'LinkSaverBot/1.0' }
-}).then(r => r.text());
+  headers: { 'User-Agent': 'LinkSaverBot/1.0' },
+}).then((r) => r.text());
 ```
 
 Then strips HTML manually:
@@ -632,14 +639,17 @@ There is no global client-side store (no Redux, no Zustand). All data is fetched
 All requests go through `apiFetch()` in `lib/api.ts`:
 
 ```typescript
-async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
+async function apiFetch<T>(
+  path: string,
+  options: FetchOptions = {},
+): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
-      'X-Requested-With': 'XMLHttpRequest',   // CSRF guard
+      'X-Requested-With': 'XMLHttpRequest', // CSRF guard
       ...headers,
     },
-    credentials: 'include',                   // Send session cookie cross-origin
+    credentials: 'include', // Send session cookie cross-origin
   });
 
   if (!res.ok) {
@@ -672,12 +682,14 @@ To avoid the React "update during render" error, the component tracks accumulate
 The server is containerized with a two-stage Docker build:
 
 **Stage 1 — Build:**
+
 - Node 22 slim base
 - Install all dependencies (including dev deps for TypeScript compilation)
 - Run `tsc` to compile to `dist/`
 - Run `tsc-alias` to resolve path aliases in compiled JS
 
 **Stage 2 — Production:**
+
 - Fresh Node 22 slim base
 - Install only production dependencies
 - Copy `dist/` from build stage
@@ -707,21 +719,21 @@ Next.js is deployed to Vercel with zero configuration beyond setting `NEXT_PUBLI
 
 **Server (Railway):**
 
-| Variable | Required | Description |
-|---|---|---|
-| `DATABASE_URL` | Yes | PostgreSQL connection string (Neon pooler URL) |
-| `ANTHROPIC_API_KEY` | Yes | Claude API key |
-| `CORS_ORIGIN` | Yes (prod) | Frontend URL (e.g., `https://app.vercel.app`) |
-| `REDIS_URL` | No | Redis connection string; caching disabled if absent |
-| `NODE_ENV` | No | Set to `production` on Railway |
-| `PORT` | No | HTTP port (default: 3001) |
-| `GCP_PROJECT_ID` | No | GCP project for Secret Manager |
-| `GCP_SA_JSON` | No | GCP service account credentials JSON |
+| Variable            | Required   | Description                                         |
+| ------------------- | ---------- | --------------------------------------------------- |
+| `DATABASE_URL`      | Yes        | PostgreSQL connection string (Neon pooler URL)      |
+| `ANTHROPIC_API_KEY` | Yes        | Claude API key                                      |
+| `CORS_ORIGIN`       | Yes (prod) | Frontend URL (e.g., `https://app.vercel.app`)       |
+| `REDIS_URL`         | No         | Redis connection string; caching disabled if absent |
+| `NODE_ENV`          | No         | Set to `production` on Railway                      |
+| `PORT`              | No         | HTTP port (default: 3001)                           |
+| `GCP_PROJECT_ID`    | No         | GCP project for Secret Manager                      |
+| `GCP_SA_JSON`       | No         | GCP service account credentials JSON                |
 
 **Web Client (Vercel):**
 
-| Variable | Required | Description |
-|---|---|---|
+| Variable              | Required   | Description                                     |
+| --------------------- | ---------- | ----------------------------------------------- |
 | `NEXT_PUBLIC_API_URL` | Yes (prod) | API base URL (default: `http://localhost:3001`) |
 
 ### Secret Management
@@ -739,6 +751,7 @@ Express 5 automatically catches errors thrown in async route handlers and passes
 ### Layered Architecture (Routes → Handlers → Services → Repositories)
 
 Each layer has a single responsibility:
+
 - **Routes** — Define URL patterns, apply middleware (rate limiters, auth guards), connect to handlers
 - **Handlers** — Parse/validate input, orchestrate calls, format HTTP responses
 - **Services** — Business logic with no HTTP concerns (Anthropic streaming, content fetching, cache operations)
@@ -749,6 +762,7 @@ This keeps handlers thin and services/repositories independently testable.
 ### SHA256 URL Hash as Cache Key
 
 Summaries are cached by `SHA256(url)` rather than by link ID. This means:
+
 1. The cache key is deterministic and computable without a DB lookup
 2. The same URL cached by one user would be reusable for another (not currently exposed, but architecturally enabled)
 3. Cache busting during link deletion requires only the `url_hash` stored on the link record
@@ -764,6 +778,7 @@ Passing an `AbortSignal` to the Anthropic SDK's `messages.stream()` call means c
 ### Transaction-Based Auth Operations
 
 Both registration and login use database transactions:
+
 - **Registration:** `createUser` + `createSession` in one transaction. If session creation fails, the user row is rolled back — no orphaned users with no way to log in.
 - **Login:** `deleteOldSessions` + `createSession` in one transaction. Prevents a window where all sessions are deleted but the new one isn't yet created.
 

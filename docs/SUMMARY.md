@@ -58,21 +58,25 @@ Link Saver AI is a bookmark manager that automatically reads and summarizes any 
 Tags let you organize and filter your links.
 
 **Creating a tag:**
+
 1. In the Tags section, pick a color with the color picker
 2. Type a name in the text input
 3. Click **Add**
 
 **Assigning a tag to a link:**
+
 1. Select a link from the sidebar
 2. In the Tags section, click the **+** button next to any tag to assign it
 3. The tag chip appears on the link in the sidebar
 4. Click **−** to remove it
 
 **Filtering by tag:**
+
 1. Click any tag chip in the Tags section to filter the sidebar to only links with that tag
 2. Click **All** to clear the filter
 
 **Deleting a tag:**
+
 1. Click the **×** button next to any tag
 2. The tag is removed from all links it was assigned to
 
