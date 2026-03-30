@@ -5,11 +5,11 @@ WORKDIR /app
 # Install dependencies (ignore-scripts skips lefthook install which isn't needed in Docker)
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY server/package.json server/
-RUN pnpm install --frozen-lockfile --filter server --ignore-scripts
+RUN pnpm install --frozen-lockfile --filter link-saver-ai-summarizer-server... --ignore-scripts
 
 # Build
 COPY server/ server/
-RUN pnpm --filter server run build
+RUN pnpm --filter link-saver-ai-summarizer-server run build
 
 # Production
 FROM node:22-slim AS production
@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY server/package.json server/
-RUN pnpm install --frozen-lockfile --filter server --prod --ignore-scripts
+RUN pnpm install --frozen-lockfile --filter link-saver-ai-summarizer-server... --prod --ignore-scripts
 
 COPY --from=base /app/server/dist server/dist
 COPY server/migrations server/migrations
