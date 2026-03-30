@@ -1,3 +1,4 @@
+import DocBar from '@/components/DocBar/DocBar';
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
 import { AuthProvider } from '@/lib/auth';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -36,6 +37,7 @@ export default function RootLayout({
             <ErrorBoundary>{children}</ErrorBoundary>
           </AuthProvider>
         </QueryProvider>
+        <DocBar />
         <Analytics />
         <SpeedInsights />
       </body>
