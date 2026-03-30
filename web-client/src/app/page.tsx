@@ -132,11 +132,11 @@ function Dashboard() {
 
   const handleDelete = useCallback(
     async (linkId: string) => {
-      await api.del(`/links/${linkId}`);
       setLinks((prev) => prev.filter((l) => l.id !== linkId));
       if (selectedLink?.id === linkId) {
         setSelectedLink(null);
       }
+      await api.del(`/links/${linkId}`);
     },
     [selectedLink],
   );
