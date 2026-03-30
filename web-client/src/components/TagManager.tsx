@@ -73,11 +73,11 @@ export default function TagManager({
 
   const handleDeleteTag = useCallback(
     async (tagId: string) => {
-      await api.del(`/tags/${tagId}`);
       if (activeFilterTag === tagId) {
         onFilterTag(null);
       }
       onTagsChange();
+      await api.del(`/tags/${tagId}`);
     },
     [activeFilterTag, onFilterTag, onTagsChange],
   );
