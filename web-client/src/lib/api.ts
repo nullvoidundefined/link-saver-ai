@@ -4,68 +4,41 @@ interface FetchOptions extends RequestInit {
   json?: unknown;
 }
 
-let csrfToken: string | null = null;
-
-async function ensureCsrfToken(): Promise<string> {
-  if (csrfToken) return csrfToken;
-  const res = await fetch(`${API_BASE}/api/csrf-token`, {
-    credentials: 'include',
-  });
-  if (!res.ok) throw new Error('Failed to fetch CSRF token');
-  const data = await res.json();
-  csrfToken = data.token as string;
-  return csrfToken;
-}
-
-const STATE_CHANGING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-
 async function apiFetch<T>(
   path: string,
   options: FetchOptions = {},
 ): Promise<T> {
   const { json, ...init } = options;
-  const method = init.method ?? 'GET';
 
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const headers: Record<string, string> = {
-      'X-Requested-With': 'XMLHttpRequest',
-      ...(init.headers as Record<string, string>),
-    };
+  const headers: Record<string, string> = {
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(init.headers as Record<string, string>),
+  };
 
-    if (json !== undefined) {
-      headers['Content-Type'] = 'application/json';
-      init.body = JSON.stringify(json);
-    }
-
-    if (STATE_CHANGING_METHODS.has(method)) {
-      headers['X-CSRF-Token'] = await ensureCsrfToken();
-    }
-
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...init,
-      headers,
-      credentials: 'include',
-    });
-
-    if (!res.ok) {
-      if (res.status === 403) {
-        csrfToken = null;
-        if (attempt === 0) continue;
-      }
-      const body = await res.json().catch(() => ({}));
-      const message =
-        (body as { message?: string })?.message ||
-        (body as { error?: { message?: string } })?.error?.message ||
-        `Request failed: ${res.status}`;
-      throw new Error(message);
-    }
-
-    if (res.status === 204 || res.headers.get('Content-Length') === '0') {
-      return undefined as T;
-    }
-    return res.json() as Promise<T>;
+  if (json !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    init.body = JSON.stringify(json);
   }
-  throw new Error('CSRF validation failed');
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const message =
+      (body as { message?: string })?.message ||
+      (body as { error?: { message?: string } })?.error?.message ||
+      `Request failed: ${res.status}`;
+    throw new Error(message);
+  }
+
+  if (res.status === 204 || res.headers.get('Content-Length') === '0') {
+    return undefined as T;
+  }
+  return res.json() as Promise<T>;
 }
 
 export const api = {
