@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.6",
-    "@bottomlessmargaritas/claude-architecture-prompts": "^2.1.0",
+    "@bottomlessmargaritas/claude-architecture-prompts": "^3.0.0",
     "@bottomlessmargaritas/formatting-configs": "^2.2.2",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@typescript-eslint/parser": "^8",

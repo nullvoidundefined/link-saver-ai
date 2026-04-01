@@ -14,7 +14,8 @@ coverage/
 *.log
 
 # Claude Code local settings
-.claude/
+.claude/*
+!.claude/bottomlessmargaritas/
 .DS_Store
 server/vitest.config.js
 server/vitest.config.js.map
