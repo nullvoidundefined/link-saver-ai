@@ -24,7 +24,6 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@extractus/article-extractor": "^8.0.14",
-    "@google-cloud/secret-manager": "^6.1.1",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
