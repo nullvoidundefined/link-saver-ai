@@ -44,7 +44,12 @@ export default defineConfig({
       },
     },
     environment: 'node',
-    exclude: [...configDefaults.exclude, 'migrations/**'],
+    exclude: [
+      ...configDefaults.exclude,
+      'migrations/**',
+      'src/__integration__/**',
+      'dist/**',
+    ],
     globals: true,
   },
 });

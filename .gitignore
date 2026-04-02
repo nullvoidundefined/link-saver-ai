@@ -19,3 +19,4 @@ coverage/
 .DS_Store
 server/vitest.config.js
 server/vitest.config.js.map
+.vercel

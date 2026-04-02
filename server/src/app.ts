@@ -102,6 +102,8 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT) || 3001;
 const HOST = '0.0.0.0';
 
+export { app };
+
 export function startServer(): void {
   validateEnv();
 

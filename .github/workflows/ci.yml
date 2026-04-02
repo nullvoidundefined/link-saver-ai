@@ -53,12 +53,42 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-      - name: Test
+      - name: Run migrations
+        run: cd server && npx node-pg-migrate up
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/test
+
+      - name: Unit tests
         run: pnpm test
         env:
           DATABASE_URL: postgres://test:test@localhost:5432/test
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
           SESSION_SECRET: test-secret
-          CSRF_SECRET: test-csrf-secret
           ANTHROPIC_API_KEY: sk-ant-test
+
+      - name: Integration tests
+        run: pnpm test:integration
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          SESSION_SECRET: test-secret
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Seed test database
+        run: npx tsx scripts/seed-test-db.ts
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/test
+
+      - name: E2E tests
+        run: npx playwright test
+        env:
+          DATABASE_URL: postgres://test:test@localhost:5432/test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          SESSION_SECRET: test-secret
+          ANTHROPIC_API_KEY: sk-ant-test
+          NEXT_PUBLIC_API_URL: http://localhost:3001
